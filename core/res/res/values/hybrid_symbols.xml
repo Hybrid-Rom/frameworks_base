@@ -35,8 +35,6 @@
   <java-symbol type="drawable" name="ic_lock_bugreport_dark" />
   <java-symbol type="drawable" name="ic_lock_lock_dark" />
   <java-symbol type="drawable" name="ic_lock_power_off_dark" />
-  
-  <!-- Power Menu stuff -->
   <java-symbol type="id" name="option1_icon" />
   <java-symbol type="id" name="option2_icon" />
   <java-symbol type="id" name="option3_icon" />
@@ -50,5 +48,9 @@
   <java-symbol type="color" name="global_actions_icon_color_selected" />
   <java-symbol type="color" name="global_actions_icon_color_enabled" />
   <java-symbol name="global_action_rebootrecovery" type="string" />
+
+  <!-- Config.xml entries -->
+  <java-symbol type="string" name="config_deviceKeyHandlerLib" />
+  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
 
 </resources>
