@@ -72,4 +72,7 @@
     <string name="permlab_preventpower">override power key</string>
     <string name="permdesc_preventpower">Allows an app to override the power key.</string>
 
+    <!-- In WiFi AP notification -->
+    <string name="notify_turn_wifi_ap_off_title">Turn Wi-Fi AP off</string>
+
 </resources>
