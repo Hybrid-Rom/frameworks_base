@@ -15,6 +15,10 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+  <!-- Theme install failure notification -->
+  <java-symbol type="string" name="theme_install_error_title" />
+  <java-symbol type="string" name="theme_install_error_message" />
+
     <!-- In WiFi AP notification -->
     <java-symbol type="string" name="notify_turn_wifi_ap_off_title" />
 </resources>
