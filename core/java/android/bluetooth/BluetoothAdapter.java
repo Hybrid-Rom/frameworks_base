@@ -1743,6 +1743,7 @@ public final class BluetoothAdapter {
      */
     @Deprecated
     public boolean startLeScan(LeScanCallback callback) {
+        if (getState() != STATE_ON) return false;
         return startLeScan(null, callback);
     }
 
@@ -1850,6 +1851,7 @@ public final class BluetoothAdapter {
     @Deprecated
     public void stopLeScan(LeScanCallback callback) {
         if (DBG) Log.d(TAG, "stopLeScan()");
+        if (getState() != STATE_ON) return;
         BluetoothLeScanner scanner = getBluetoothLeScanner();
         if (scanner == null) {
             return;
