@@ -2176,4 +2176,7 @@
   <java-symbol type="integer" name="config_proximityCheckTimeout" />
 
   <java-symbol type="bool" name="config_fetch_apn_from_omh_card" />
+  
+  <java-symbol name="reboot_title" type="string" />
+  <java-symbol name="ic_lock_power_reboot" type="drawable" />
 </resources>
