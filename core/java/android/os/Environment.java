@@ -175,10 +175,8 @@ public class Environment {
             return mExternalDirsForApp[0];
         }
 
-        /** {@hide} */
         public File getSecondaryStorageDirectory() {
-            return (mExternalDirsForApp.length > 1)
-                    ? mExternalDirsForApp[1] : mExternalDirsForApp[0];
+            return mExternalDirsForApp[1];
         }
 
         @Deprecated
@@ -431,6 +429,11 @@ public class Environment {
     public static File getSecondaryStorageDirectory() {
         throwIfUserRequired();
         return sCurrentUser.getSecondaryStorageDirectory();
+    }
+
+    public static File getSecondaryStorageDirectory() {
+        throwIfUserRequired();
+        return sCurrentUser.getExternalDirsForApp()[1];
     }
 
     /** {@hide} */
@@ -788,7 +791,6 @@ public class Environment {
         return isExternalStorageRemovable(externalDir);
     }
 
-    /** {@hide} */
     public static boolean isNoEmulatedStorageExist() {
         final StorageVolume volume = getNoEmulatedVolume();
         return (volume != null);
