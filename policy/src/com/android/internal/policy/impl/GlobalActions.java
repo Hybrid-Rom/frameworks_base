@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010-2014 CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +28,9 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Profile;
+import android.app.ProfileManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -127,6 +131,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasTelephony;
     private boolean mHasVibrator;
     private final boolean mShowSilentToggle;
+    private Profile mChosenProfile;
 
     /**
      * @param context everything needs a context :(
@@ -348,7 +353,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         return dialog;
     }
-	
+
     private final class PowerAction extends SinglePressAction implements LongPressAction {
         private PowerAction() {
             super(com.android.internal.R.drawable.ic_lock_power_off,
@@ -377,7 +382,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mWindowManagerFuncs.shutdown(false /* confirm */);
         }
     }
-    
+
     private final class RebootAction extends SinglePressAction implements LongPressAction {
         private RebootAction() {
             super(com.android.internal.R.drawable.ic_lock_reboot,
