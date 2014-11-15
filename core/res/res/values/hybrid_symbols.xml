@@ -51,5 +51,6 @@
   <java-symbol type="color" name="global_actions_icon_color_normal" />
   <java-symbol type="color" name="global_actions_icon_color_selected" />
   <java-symbol type="color" name="global_actions_icon_color_enabled" />
+  <java-symbol name="global_action_rebootrecovery" type="string" />
 
 </resources>
