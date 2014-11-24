@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.SdkConstant;
+import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
 import android.content.Context;
