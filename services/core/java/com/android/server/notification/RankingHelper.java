@@ -207,7 +207,6 @@ public class RankingHelper implements RankingConfig {
             SparseIntArray visibilityByUid = mPackageVisibilities.get(packageName);
             SparseIntArray keyguardByUid = mPackageOnKeyguard.get(packageName);
             SparseIntArray headsUpByUid = mPackageHeadsUp.get(packageName);
-            
             if (priorityByUid != null) {
                 final int M = priorityByUid.size();
                 for (int j = 0; j < M; j++) {
