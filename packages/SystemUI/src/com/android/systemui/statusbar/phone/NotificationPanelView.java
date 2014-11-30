@@ -966,7 +966,7 @@ public class NotificationPanelView extends PanelView implements
             return true;
         }
     };
-    
+
     private void animateHeaderSlidingIn() {
         mHeaderAnimatingIn = true;
         getViewTreeObserver().addOnPreDrawListener(mStartHeaderSlidingIn);
