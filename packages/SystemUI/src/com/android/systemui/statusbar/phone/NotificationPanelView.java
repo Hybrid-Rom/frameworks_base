@@ -183,6 +183,7 @@ public class NotificationPanelView extends PanelView implements
     private SettingsObserver mSettingsObserver;
 
     private int mOneFingerQuickSettingsInterceptMode;
+    private int mQsSmartPullDown;
     private boolean mDoubleTapToSleepEnabled;
     private int mStatusBarHeaderHeight;
 
@@ -649,6 +650,14 @@ public class NotificationPanelView extends PanelView implements
                 mOneFingerQuickSettingsInterceptMode > ONE_FINGER_QS_INTERCEPT_OFF
                 && event.getActionMasked() == MotionEvent.ACTION_DOWN
                 && shouldQuickSettingsIntercept(event.getX(), event.getY(), -1, false);
+
+        if (mQsSmartPullDown == 1 && !mStatusBar.hasActiveClearableNotifications()
+                || mQsSmartPullDown == 2 && !mStatusBar.hasActiveVisibleNotifications()
+                || (mQsSmartPullDown == 3 && (!mStatusBar.hasActiveVisibleNotifications()
+                        || !mStatusBar.hasActiveClearableNotifications()))) {
+            oneFingerQsOverride = true;
+        }
+
         if ((twoFingerQsEvent || oneFingerQsOverride)
                 && event.getY(event.getActionIndex()) < mStatusBarMinHeight) {
             mTwoFingerQsExpand = true;
@@ -1911,6 +1920,18 @@ public class NotificationPanelView extends PanelView implements
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN),
                     false, this, UserHandle.USER_ALL);
+<<<<<<< HEAD
+=======
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_SMART_PULLDOWN),
+                    false, this, UserHandle.USER_ALL);
+>>>>>>> 6246bac... Return: Smart Pulldown [1/2]
             update();
         }
 
@@ -1935,6 +1956,9 @@ public class NotificationPanelView extends PanelView implements
             mOneFingerQuickSettingsInterceptMode = Settings.System.getIntForUser(
                     resolver, Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN,
                     ONE_FINGER_QS_INTERCEPT_END, UserHandle.USER_CURRENT);
+            mQsSmartPullDown = Settings.System.getIntForUser(
+                    resolver, Settings.System.QS_SMART_PULLDOWN, 0,
+                    UserHandle.USER_CURRENT);
         }
     }
 }
