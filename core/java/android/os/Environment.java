@@ -177,7 +177,8 @@ public class Environment {
 
         /** {@hide} */
         public File getSecondaryStorageDirectory() {
-            return mExternalDirsForApp[1];
+            return (mExternalDirsForApp.length > 1)
+                    ? mExternalDirsForApp[1] : mExternalDirsForApp[0];
         }
 
         @Deprecated
@@ -430,12 +431,6 @@ public class Environment {
     public static File getSecondaryStorageDirectory() {
         throwIfUserRequired();
         return sCurrentUser.getSecondaryStorageDirectory();
-    }
-
-    /** {@hide} */
-    public static File getSecondaryStorageDirectory() {
-        throwIfUserRequired();
-        return sCurrentUser.getExternalDirsForApp()[1];
     }
 
     /** {@hide} */
