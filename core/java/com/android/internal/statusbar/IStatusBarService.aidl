@@ -58,4 +58,11 @@ interface IStatusBarService
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
+<<<<<<< HEAD
+=======
+    void setAutoRotate(boolean enabled);
+    void showCustomIntentAfterKeyguard(inout Intent intent);
+    void hideHeadsUpCandidate(String packageName);
+    void scheduleHeadsUpClose();
+>>>>>>> edf64d3... Frameworks: Slim heads up customizations for LP (1/2)
 }
