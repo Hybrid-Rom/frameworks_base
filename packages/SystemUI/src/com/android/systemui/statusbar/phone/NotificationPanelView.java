@@ -653,8 +653,8 @@ public class NotificationPanelView extends PanelView implements
 
         if (mQsSmartPullDown == 1 && !mStatusBar.hasActiveClearableNotifications()
                 || mQsSmartPullDown == 2 && !mStatusBar.hasActiveVisibleNotifications()
-                || (mQsSmartPullDown == 3 && (!mStatusBar.hasActiveVisibleNotifications()
-                        || !mStatusBar.hasActiveClearableNotifications()))) {
+                || (mQsSmartPullDown == 3 && !mStatusBar.hasActiveVisibleNotifications()
+                        && !mStatusBar.hasActiveClearableNotifications())) {
             oneFingerQsOverride = true;
         }
 
@@ -1920,18 +1920,9 @@ public class NotificationPanelView extends PanelView implements
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN),
                     false, this, UserHandle.USER_ALL);
-<<<<<<< HEAD
-=======
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD),
-                    false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_SMART_PULLDOWN),
                     false, this, UserHandle.USER_ALL);
->>>>>>> 6246bac... Return: Smart Pulldown [1/2]
             update();
         }
 
