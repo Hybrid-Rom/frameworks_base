@@ -18,7 +18,7 @@
 -->
 <resources>
     <bool name="def_dim_screen">true</bool>
-    <integer name="def_screen_off_timeout">60000</integer>
+    <integer name="def_screen_off_timeout">260000</integer>
     <integer name="def_sleep_timeout">-1</integer>
     <bool name="def_airplane_mode_on">false</bool>
     <!-- Comma-separated list of bluetooth, wifi, and cell. -->
@@ -26,7 +26,7 @@
     <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi,nfc</string>
     <bool name="def_auto_time">true</bool>
     <bool name="def_auto_time_zone">true</bool>
-    <bool name="def_accelerometer_rotation">true</bool>
+    <bool name="def_accelerometer_rotation">false</bool>
     <!-- Default screen brightness, from 0 to 255.  102 is 40%. -->
     <integer name="def_screen_brightness">102</integer>
     <bool name="def_screen_brightness_automatic_mode">false</bool>
@@ -36,13 +36,13 @@
 
     <bool name="def_bluetooth_on">false</bool>
     <bool name="def_wifi_display_on">false</bool>
-    <bool name="def_install_non_market_apps">false</bool>
-    <bool name="def_package_verifier_enable">true</bool>
+    <bool name="def_install_non_market_apps">true</bool>
+    <bool name="def_package_verifier_enable">false</bool>
     <!-- Comma-separated list of location providers.
          Network location is off by default because it requires
          user opt-in via Setup Wizard or Settings.
     -->
-    <string name="def_location_providers_allowed" translatable="false">gps</string>
+    <string name="def_location_providers_allowed" translatable="true">gps</string>
     <bool name="assisted_gps_enabled">true</bool>
     <bool name="def_netstats_enabled">true</bool>
     <bool name="def_usb_mass_storage_enabled">true</bool>
@@ -56,7 +56,7 @@
 
     <!-- Default value for whether or not to pulse the notification LED when there is a
          pending notification -->
-    <bool name="def_notification_pulse">true</bool>
+    <bool name="def_notification_pulse">false</bool>
 
     <bool name="def_mount_play_notification_snd">true</bool>
     <bool name="def_mount_ums_autostart">false</bool>
