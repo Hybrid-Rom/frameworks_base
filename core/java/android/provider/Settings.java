@@ -4910,6 +4910,7 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
+
         /**
          * Whether to include options in power menu for rebooting into recovery and bootloader
          * @hide
