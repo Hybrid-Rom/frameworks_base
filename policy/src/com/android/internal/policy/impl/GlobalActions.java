@@ -221,7 +221,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
         mAirplaneModeOn = new ToggleAction(
                 R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
+                R.drawable.ic_lock_airplane_mode_off_dark,
                 R.string.global_actions_toggle_airplane_mode,
                 R.string.global_actions_airplane_mode_on_status,
                 R.string.global_actions_airplane_mode_off_status) {
@@ -450,11 +450,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private Action getSettingsAction() {
-<<<<<<< HEAD
-        return new SinglePressAction(com.android.internal.R.drawable.ic_settings,
-=======
         return new SinglePressAction(com.android.internal.R.drawable.ic_lock_settings,
->>>>>>> 28c6461... Power menu: Update icon colors:
                 R.string.global_action_settings) {
 
             @Override
