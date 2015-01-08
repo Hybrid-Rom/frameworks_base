@@ -2084,13 +2084,6 @@ public final class Settings {
         public static final String QS_SMART_PULLDOWN = "qs_smart_pulldown";
 
         /**
-         * Whether to control brightness from status bar
-         *
-         * @hide
-         */
-        public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
-
-        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated Use {@link Global#SHOW_PROCESSES} instead
@@ -4944,12 +4937,6 @@ public final class Settings {
          */
         public static final String STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD
                 = "status_bar_locked_on_secure_keyguard";
-
-        /**
-         * Whether to use the custom quick unlock screen control
-         * @hide
-         */
-        public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
 
         /**
          * Whether to include options in power menu for rebooting into recovery and bootloader
