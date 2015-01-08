@@ -6401,4 +6401,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mOrientationListener.dump(pw, prefix);
         }
     }
+
+    private boolean isOffscreenWakeKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (DEBUG_WAKEUP) Log.i(TAG, "isOffscreenWakeKey: mVolumeWakeSupport " + mVolumeWakeSupport);
+                return mVolumeWakeSupport;
+            case KeyEvent.KEYCODE_HOME:
+                return mHomeWakeSupport;
+        }
+        return false;
+    }
 }
