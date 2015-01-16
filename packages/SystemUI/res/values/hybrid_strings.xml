@@ -20,4 +20,6 @@
     <string name="advanced_dev_option_force_stop">Force stop</string>
     <string name="advanced_dev_option_uninstall">Uninstall</string>
     
+    <!-- Clear Recents -->
+    <string name="clear_recents">Close all recent</string>
 </resources>

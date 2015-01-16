@@ -5246,7 +5246,7 @@ public final class Settings {
             LOCKSCREEN_QUICK_UNLOCK_CONTROL,
             ADVANCED_REBOOT,
             STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD,
-            LOCKSCREEN_QUICK_UNLOCK_CONTROL
+            LOCKSCREEN_QUICK_UNLOCK_CONTROL,
             DEVELOPMENT_SHORTCUT
         };
 
@@ -7465,8 +7465,7 @@ public final class Settings {
          *            cleared (the bookmark is not removed).
          * @return The unique content URL for the new bookmark entry.
          */
-        public static Uri add(ContentResolver cr,
-                                           Intent intent,
+        public static Uri add(ContentResolver cr,Intent intent,
                                            String title,
                                            String folder,
                                            char shortcut,
@@ -7543,18 +7542,5 @@ public final class Settings {
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
             return info != null ? info.loadLabel(packageManager) : "";
         }
-    }
-
-    /**
-     * Returns the device ID that we should use when connecting to the mobile gtalk server.
-     * This is a string like "android-0x1242", where the hex string is the Android ID obtained
-     * from the GoogleLoginService.
-     *
-     * @param androidId The Android ID for this device.
-     * @return The device ID that should be used when connecting to the mobile gtalk server.
-     * @hide
-     */
-    public static String getGTalkDeviceId(long androidId) {
-        return "android-" + Long.toHexString(androidId);
-    }
+	}
 }
