@@ -21,7 +21,7 @@
     <color name="background_floating_material_dark">#000</color>
     <color name="background_floating_material_light">#ffeeeeee</color>
 
-    <color name="primary_material_dark">#ff263238</color>
+    <color name="primary_material_dark">#ff21272b</color>
     <color name="primary_material_light">#ffbdbdbd</color>
     <color name="primary_dark_material_dark">#000</color>
     <color name="primary_dark_material_light">#ff757575</color>
@@ -32,7 +32,7 @@
     <color name="accent_material_light">@color/material_blue_A700</color>
     <color name="accent_material_dark">@color/material_blue_A700</color>
 
-    <color name="button_material_dark">#ffE53935</color>
+    <color name="button_material_dark">#ff21272b</color>
     <color name="button_material_light">#ffd6d7d7</color>
 
     <color name="switch_thumb_normal_material_dark">#ffbdbdbd</color>
