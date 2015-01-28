@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright (C) 2014 The CyanogenMod Project
+=======
+ * Copyright (C) 2013-14 The Android Open Source Project
+>>>>>>> df79087... [2/2] Settings: Add options for battery icon and text in status bar
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +20,7 @@
 
 package com.android.systemui;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -28,6 +33,10 @@ import com.android.systemui.statusbar.policy.BatteryController;
 
 public class BatteryLevelTextView extends TextView implements
         BatteryController.BatteryStateChangeCallback{
+
+    private static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
+    private static final String STATUS_BAR_SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
+
     private BatteryController mBatteryController;
     private boolean mShow;
 
@@ -45,8 +54,38 @@ public class BatteryLevelTextView extends TextView implements
     }
 
     private void loadShowBatteryTextSetting() {
-        mShow = 2 == Settings.System.getInt(getContext().getContentResolver(),
-                Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0);
+        //mShow = 2 == Settings.System.getInt(getContext().getContentResolver(),
+        //        Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0);
+
+        ContentResolver resolver = getContext().getContentResolver();
+
+        boolean showNextPercent = Settings.System.getInt(resolver,
+                Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0) == 2;
+
+        int batteryStyle = Settings.System.getInt(resolver,
+                Settings.System.STATUS_BAR_BATTERY_STYLE, 0);
+        switch (batteryStyle) {
+            case 4:
+                //meterMode = BatteryMeterMode.BATTERY_METER_GONE;
+                showNextPercent = false;
+                break;
+
+            case 6:
+                //meterMode = BatteryMeterMode.BATTERY_METER_TEXT;
+                showNextPercent = true;
+                break;
+
+            default:
+                break;
+        }
+
+        setShowPercent(showNextPercent);
+
+    }
+
+    public void setShowPercent(boolean show) {
+        mShow = show;
+        setVisibility(mShow ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -68,7 +107,9 @@ public class BatteryLevelTextView extends TextView implements
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
-                "status_bar_show_battery_percent"), false, mObserver);
+                STATUS_BAR_BATTERY_STYLE), false, mObserver);
+        getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                STATUS_BAR_SHOW_BATTERY_PERCENT), false, mObserver);
     }
 
     @Override
