@@ -63,6 +63,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
+import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -3027,16 +3028,12 @@ public final class PowerManagerService extends SystemService
                 return;
             }
 
-            boolean withProximity = mProximityWakeSupported && mProximityWakeEnabled
-                    && mProximitySensor != null;
+            TelephonyManager tm = (TelephonyManager)mContext.getSystemService(
+                    Context.TELEPHONY_SERVICE);
+            boolean hasIncomingCall = tm.getCallState() == TelephonyManager.CALL_STATE_RINGING;
 
-            if (withProximity) {
-                TelephonyManager tm = (TelephonyManager) mContext.getSystemService(
-                        Context.TELEPHONY_SERVICE);
-                withProximity = tm.getCallState() != TelephonyManager.CALL_STATE_RINGING;
-            }
-
-            if (withProximity) {
+            if (mProximityWakeSupported && mProximityWakeEnabled && mProximitySensor != null
+                    && !hasIncomingCall) {
                 Message msg = mHandler.obtainMessage(MSG_WAKE_UP);
                 msg.obj = r;
                 mHandler.sendMessageDelayed(msg, mProximityTimeOut);
