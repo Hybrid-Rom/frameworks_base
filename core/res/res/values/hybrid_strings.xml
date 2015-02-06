@@ -68,4 +68,8 @@
     <string name="permlab_changeHeadsUpState">enable or disable heads up</string>
     <string name="permdesc_changeHeadsUpState">Allows the application to change whether another application is allowed to show normal notifications as heads up notification.</string>
 
+    <!-- Camera power key shuttuer -->
+    <string name="permlab_preventpower">override power key</string>
+    <string name="permdesc_preventpower">Allows an app to override the power key.</string>
+
 </resources>
