@@ -12,7 +12,7 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <color name="global_actions_icon_color_normal">#64B5F6</color>
+    <color name="global_actions_icon_color_normal">#2962FF</color>
     <color name="global_actions_icon_color_selected">@color/white</color>
     <color name="global_actions_icon_color_enabled">@color/global_actions_icon_color_selected</color>
 
