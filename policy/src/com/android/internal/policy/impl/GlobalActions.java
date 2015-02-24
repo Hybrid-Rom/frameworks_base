@@ -1345,4 +1345,3 @@ private final class RebootRecoveryAction extends SinglePressAction {
         }
     }
 }
-
