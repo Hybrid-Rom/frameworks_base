@@ -2188,4 +2188,7 @@
 
   <!-- IME Switch -->
   <java-symbol type="bool" name="config_show_cmIMESwitcher"/>
+
+  <!-- Gesture Sensor -->
+  <java-symbol type="bool" name="config_enableGestureService" />
 </resources>
