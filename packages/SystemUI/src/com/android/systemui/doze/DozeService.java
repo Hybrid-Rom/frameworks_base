@@ -135,6 +135,11 @@ public class DozeService extends DreamService {
         mPickupSensor = new TriggerSensor(Sensor.TYPE_PICK_UP_GESTURE,
                 mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup(),
                 DozeLog.PULSE_REASON_SENSOR_PICKUP);
+        mUseAccelerometer = mDozeParameters.setUsingAccelerometerAsSensorPickUp();
+        if (mUseAccelerometer) {
+            mProximitySensorManager = new ProximitySensorManager(mContext, this);
+            mShakeSensorManager = new ShakeSensorManager(mContext, this);
+        }
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
         mWakeLock.setReferenceCounted(true);
