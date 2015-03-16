@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2010-2014 CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +30,15 @@ import android.app.Dialog;
 import android.app.Profile;
 import android.app.ProfileManager;
 import android.content.ActivityNotFoundException;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ThemeUtils;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
-import android.graphics.PorterDuff.Mode;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -108,11 +106,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final String GLOBAL_ACTION_KEY_USERS = "users";
     private static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
     private static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
-    private static final String GLOBAL_ACTION_KEY_REBOOTRECOVERY = "rebootrecovery";
 
     private final Context mContext;
     private final WindowManagerFuncs mWindowManagerFuncs;
-    private Context mUiContext;
     private final AudioManager mAudioManager;
     private final IDreamManager mDreamManager;
 
@@ -150,8 +146,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
-        ThemeUtils.registerThemeChangeReceiver(context, mThemeChangeReceiver);
-
         ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         mHasTelephony = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
@@ -177,7 +171,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned) {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
-        if (mDialog != null && mUiContext == null) {
+        if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
             // Show delayed, so that the dismiss of the previous dialog completes
@@ -218,14 +212,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-    private Context getUiContext() {
-        if (mUiContext == null) {
-            mUiContext = ThemeUtils.createUiContext(mContext);
-            mUiContext.setTheme(android.R.style.Theme_DeviceDefault_Light_DarkActionBar);
-        }
-        return mUiContext != null ? mUiContext : mContext;
-    }
-
     /**
      * Create the global actions dialog.
      * @return A new dialog.
@@ -239,7 +225,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
         mAirplaneModeOn = new ToggleAction(
                 R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off_dark,
+                R.drawable.ic_lock_airplane_mode_off,
                 R.string.global_actions_toggle_airplane_mode,
                 R.string.global_actions_airplane_mode_on_status,
                 R.string.global_actions_airplane_mode_off_status) {
@@ -295,8 +281,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mItems.add(new PowerAction());
             } else if (GLOBAL_ACTION_KEY_REBOOT.equals(actionKey)) {
                 mItems.add(new RebootAction());
-            } else if (GLOBAL_ACTION_KEY_REBOOTRECOVERY.equals(actionKey)) {
-                mItems.add(new RebootRecoveryAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
@@ -325,12 +309,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         mAdapter = new MyAdapter();
 
-        AlertParams params = new AlertParams(getUiContext());
+        AlertParams params = new AlertParams(mContext);
         params.mAdapter = mAdapter;
         params.mOnClickListener = this;
         params.mForceInverseBackground = true;
 
-        GlobalActionsDialog dialog = new GlobalActionsDialog(getUiContext(), params);
+        GlobalActionsDialog dialog = new GlobalActionsDialog(mContext, params);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
 
         dialog.getListView().setItemsCanFocus(true);
@@ -378,45 +362,22 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         @Override
         public void onPress() {
+            final boolean quickbootEnabled = Settings.System.getInt(
+                    mContext.getContentResolver(), "enable_quickboot", 0) == 1;
+            // go to quickboot mode if enabled
+            if (quickbootEnabled) {
+                startQuickBoot();
+                return;
+            }
             // shutdown by making sure radio and power are handled accordingly.
             mWindowManagerFuncs.shutdown(false /* confirm */);
         }
     }
 
-    private final class RebootAction extends SinglePressAction implements LongPressAction {
+    private final class RebootAction extends SinglePressAction {
         private RebootAction() {
-            super(com.android.internal.R.drawable.ic_lock_reboot,
-                R.string.global_action_reboot);
-        }
-
-        @Override
-        public boolean onLongPress() {
-            mWindowManagerFuncs.rebootSafeMode(true);
-            return true;
-        }
-
-        @Override
-        public boolean showDuringKeyguard() {
-            return true;
-        }
-
-        @Override
-        public boolean showBeforeProvisioning() {
-            return true;
-        }
-
-        @Override
-        public void onPress() {
-            // shutdown by making sure radio and power are handled accordingly.
-            mWindowManagerFuncs.shutdown(false /* confirm */);
-            mWindowManagerFuncs.reboot();
-        }
-    }
-
-private final class RebootRecoveryAction extends SinglePressAction {
-        private RebootRecoveryAction() {
             super(com.android.internal.R.drawable.ic_lock_power_reboot,
-                    R.string.global_action_rebootrecovery);
+                    R.string.global_action_reboot);
         }
 
         @Override
@@ -432,9 +393,9 @@ private final class RebootRecoveryAction extends SinglePressAction {
         @Override
         public void onPress() {
             try {
-                IPowerManager powermanager = IPowerManager.Stub.asInterface(ServiceManager
+                IPowerManager pm = IPowerManager.Stub.asInterface(ServiceManager
                         .getService(Context.POWER_SERVICE));
-                powermanager.reboot(true, "recovery", false);
+                pm.reboot(true, null, false);
             } catch (RemoteException e) {
                 Log.e(TAG, "PowerManager service died!", e);
                 return;
@@ -442,14 +403,12 @@ private final class RebootRecoveryAction extends SinglePressAction {
         }
     }
 
-
     private Action getBugReportAction() {
         return new SinglePressAction(com.android.internal.R.drawable.ic_lock_bugreport,
                 R.string.bugreport_title) {
 
             public void onPress() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(
-                        mContext, com.android.internal.R.style.Theme_Material_Dialog_Alert_Dark);
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle(com.android.internal.R.string.bugreport_title);
                 builder.setMessage(com.android.internal.R.string.bugreport_message);
                 builder.setNegativeButton(com.android.internal.R.string.cancel, null);
@@ -499,30 +458,8 @@ private final class RebootRecoveryAction extends SinglePressAction {
         };
     }
 
-    private Action getPowerAction() {
-        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_power_off,
-                R.string.global_action_power_off) {
-
-            @Override
-            public void onPress() {
-                // shutdown by making sure radio and power are handled accordingly.
-                mWindowManagerFuncs.shutdown(false /* confirm */);
-            }
-
-            @Override
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            @Override
-            public boolean showBeforeProvisioning() {
-                return true;
-            }
-        };
-    }
-
     private Action getSettingsAction() {
-        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_settings,
+        return new SinglePressAction(com.android.internal.R.drawable.ic_settings,
                 R.string.global_action_settings) {
 
             @Override
@@ -726,8 +663,7 @@ private final class RebootRecoveryAction extends SinglePressAction {
 
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
-            final Context context = getUiContext();
-            return action.create(context, convertView, parent, LayoutInflater.from(context));
+            return action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
         }
     }
 
@@ -1011,7 +947,6 @@ private final class RebootRecoveryAction extends SinglePressAction {
     private static class SilentModeTriStateAction implements Action, View.OnClickListener {
 
         private final int[] ITEM_IDS = { R.id.option1, R.id.option2, R.id.option3 };
-        private final int[] IMAGE_VIEW_IDS = { R.id.option1_icon, R.id.option2_icon, R.id.option3_icon };
 
         private final AudioManager mAudioManager;
         private final Handler mHandler;
@@ -1045,17 +980,7 @@ private final class RebootRecoveryAction extends SinglePressAction {
             int selectedIndex = ringerModeToIndex(mAudioManager.getRingerMode());
             for (int i = 0; i < 3; i++) {
                 View itemView = v.findViewById(ITEM_IDS[i]);
-                View iv = v.findViewById(IMAGE_VIEW_IDS[i]);
-                iv.setSelected(selectedIndex == i);
-                if (selectedIndex == i) {
-                    ((ImageView)iv).setColorFilter(context.getResources().getColor(
-                            R.color.global_actions_icon_color_selected),
-                            Mode.MULTIPLY);
-                } else {
-                    ((ImageView)iv).setColorFilter(context.getResources().getColor(
-                            R.color.global_actions_icon_color_normal),
-                            Mode.MULTIPLY);
-                }
+                itemView.setSelected(selectedIndex == i);
                 // Set up click handler
                 itemView.setTag(i);
                 itemView.setOnClickListener(this);
@@ -1111,21 +1036,13 @@ private final class RebootRecoveryAction extends SinglePressAction {
         }
     };
 
-    private BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            mUiContext = null;
-        }
-    };
-
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onServiceStateChanged(ServiceState serviceState) {
             if (!mHasTelephony) return;
             final boolean inAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
             mAirplaneState = inAirplaneMode ? ToggleAction.State.On : ToggleAction.State.Off;
-            if (mAirplaneModeOn != null) {
-                mHandler.sendEmptyMessage(MESSAGE_REFRESH_AIRPLANEMODE);
-            }
+            mAirplaneModeOn.updateState(mAirplaneState);
             mAdapter.notifyDataSetChanged();
         }
     };
@@ -1149,7 +1066,6 @@ private final class RebootRecoveryAction extends SinglePressAction {
     private static final int MESSAGE_DISMISS = 0;
     private static final int MESSAGE_REFRESH = 1;
     private static final int MESSAGE_SHOW = 2;
-    private static final int MESSAGE_REFRESH_AIRPLANEMODE = 3;
     private static final int DIALOG_DISMISS_DELAY = 300; // ms
 
     private Handler mHandler = new Handler() {
@@ -1168,10 +1084,6 @@ private final class RebootRecoveryAction extends SinglePressAction {
             case MESSAGE_SHOW:
                 handleShow();
                 break;
-            case MESSAGE_REFRESH_AIRPLANEMODE:
-	        mAirplaneModeOn.updateState(mAirplaneState);
-	        mAdapter.notifyDataSetChanged();
-	        break;
             }
         }
     };
@@ -1205,6 +1117,16 @@ private final class RebootRecoveryAction extends SinglePressAction {
         }
     }
 
+    private void startQuickBoot() {
+
+        Intent intent = new Intent("org.codeaurora.action.QUICKBOOT");
+        intent.putExtra("mode", 0);
+        try {
+            mContext.startActivityAsUser(intent,UserHandle.CURRENT);
+        } catch (ActivityNotFoundException e) {
+        }
+    }
+
     private static final class GlobalActionsDialog extends Dialog implements DialogInterface {
         private final Context mContext;
         private final int mWindowTouchSlop;
@@ -1217,7 +1139,7 @@ private final class RebootRecoveryAction extends SinglePressAction {
         private boolean mCancelOnUp;
 
         public GlobalActionsDialog(Context context, AlertParams params) {
-            super(context, com.android.internal.R.style.Theme_Material_Dialog_Dark);
+            super(context, getDialogTheme(context));
             mContext = context;
             mAlert = new AlertController(mContext, this, getWindow());
             mAdapter = (MyAdapter) params.mAdapter;
