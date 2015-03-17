@@ -2106,13 +2106,6 @@ public final class Settings {
         public static final String STATUS_BAR_TICKER_ENABLED = "status_bar_ticker_enabled";
 
         /**
-         * Whether to enable ticker animation in statusbar
-         *
-         * @hide
-         */
-        public static final String STATUS_BAR_TICKER_ENABLED = "status_bar_ticker_enabled";
-
-        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated Use {@link Global#SHOW_PROCESSES} instead
@@ -3070,15 +3063,6 @@ public final class Settings {
          * @hide
          */
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
-
-        /**
-         * Status bar battery %
-         * 0: Hide the battery percentage
-         * 1: Display the battery percentage inside the icon
-         * 2: Display the battery percentage next to the icon
-         * @hide
-         */
-        public static final String STATUS_BAR_SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
 
         /**
          * Volume rocker wake
