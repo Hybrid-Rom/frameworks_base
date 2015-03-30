@@ -1833,12 +1833,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 113;
         }
 
-        if (upgradeVersion < 114) {
-            moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_SECURE,
-                    new String[] { Settings.Secure.VOLUME_LINK_NOTIFICATION }, true);
-            upgradeVersion = 114;
-        }
-
         if (upgradeVersion < 115) {
             // CM11 used "holo" as a system default theme. For CM12 and up its been
             // switched to "system". So change all "holo" references in themeConfig to "system"
