@@ -48,6 +48,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.ThemeConfig;
 import android.content.res.Resources;
@@ -766,14 +767,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
         if (isMSim()) {
-            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+            mStatusBarWindowContent = (FrameLayout) View.inflate(context,
                     R.layout.msim_super_status_bar, null);
         } else {
-            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+            mStatusBarWindowContent = (FrameLayout) View.inflate(context,
                     R.layout.super_status_bar, null);
         }
-        mStatusBarWindow.mService = this;
-        mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
+        mStatusBarWindowContent.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 checkUserAutohide(v, event);
@@ -786,18 +786,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }});
 
         if (isMSim()) {
-            mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(
+            mStatusBarView = (PhoneStatusBarView) mStatusBarWindowContent.findViewById(
                     R.id.msim_status_bar);
         } else {
-            mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
+            mStatusBarView = (PhoneStatusBarView) mStatusBarWindowContent.findViewById(R.id.status_bar);
         }
         mStatusBarView.setBar(this);
 
         PanelHolder holder;
         if (isMSim()) {
-            holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.msim_panel_holder);
+            holder = (PanelHolder) mStatusBarWindowContent.findViewById(R.id.msim_panel_holder);
         } else {
-            holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
+            holder = (PanelHolder) mStatusBarWindowContent.findViewById(R.id.panel_holder);
         }
         mStatusBarView.setPanelHolder(holder);
 
@@ -840,9 +840,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         try {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
-            if (showNav) {
+            if (showNav && !mRecreating) {
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+                mNavigationBarView.updateResources(getNavbarThemedResources());
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
@@ -996,8 +997,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             mMSimNetworkController.addEmergencyLabelView(mHeader);
 
-            mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
-            mSubsLabel = (TextView)mStatusBarWindow.findViewById(R.id.subs_label);
+            mCarrierLabel = (TextView)mStatusBarWindowContent.findViewById(R.id.carrier_label);
+            mSubsLabel = (TextView)mStatusBarWindowContent.findViewById(R.id.subs_label);
             mShowCarrierInPanel = (mCarrierLabel != null);
 
             if (DEBUG) Log.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" +
@@ -1044,7 +1045,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mNetworkController.addEmergencyLabelView(mHeader);
             }
 
-            mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
+            mCarrierLabel = (TextView)mStatusBarWindowContent.findViewById(R.id.carrier_label);
             mShowCarrierInPanel = (mCarrierLabel != null);
             if (DEBUG) Log.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
             if (mShowCarrierInPanel) {
@@ -3728,7 +3729,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         removeHeadsUpView();
 
-        mStatusBarWindow.removeContent(mStatusBarWindowContent);
         mStatusBarWindow.clearDisappearingChildren();
 
         // extract icons from the soon-to-be recreated viewgroup.

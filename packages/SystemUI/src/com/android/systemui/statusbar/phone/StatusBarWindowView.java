@@ -18,12 +18,16 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.database.ContentObserver;
+import android.content.ContentResolver;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.media.session.MediaSessionLegacyHelper;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -94,8 +98,6 @@ public class StatusBarWindowView extends FrameLayout {
                 R.id.notification_stack_scroller);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         mDragDownHelper = new DragDownHelper(getContext(), this, mStackScrollLayout, mService);
-        mBrightnessMirror = findViewById(R.id.brightness_mirror);
-        mSettingsObserver.observe();
 
         // We really need to be able to animate while window animations are going on
         // so that activities may be started asynchronously from panel animations
@@ -253,30 +255,4 @@ public class StatusBarWindowView extends FrameLayout {
         mBrightnessMirror = content.findViewById(R.id.brightness_mirror);
 
     }
-
-    public void removeContent(View content) {
-        removeView(content);
-    }
-
-    class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void unobserve() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.unregisterContentObserver(this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            update();
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            update();
-        }
-    }
 }
-
