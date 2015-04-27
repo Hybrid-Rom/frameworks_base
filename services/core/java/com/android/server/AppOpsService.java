@@ -73,15 +73,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     // Write at most every 30 minutes.
     static final long WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
 
-    // Location of policy file.
-    static final String DEFAULT_POLICY_FILE = "/system/etc/appops_policy.xml";
-
     Context mContext;
     final AtomicFile mFile;
     final Handler mHandler;
-    final Looper mLooper;
-    final boolean mStrictEnable;
-    AppOpsPolicy mPolicy;
 
     boolean mWriteScheduled;
     boolean mFastWriteScheduled;
@@ -215,7 +209,6 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public void publish(Context context) {
         mContext = context;
-        readPolicy();
         ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
     }
 
@@ -404,7 +397,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         }
                         repCbs.addAll(cbs);
                     }
-                    if (mode == getDefaultMode(code, uid, packageName)) {
+                    if (mode == AppOpsManager.opToDefaultMode(op.op)) {
                         // If going into the default mode, prune this op
                         // if there is nothing else interesting in it.
                         pruneOp(op, uid, packageName);
@@ -1025,21 +1018,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             String tagName = parser.getName();
             if (tagName.equals("op")) {
-                int code = Integer
-                        .parseInt(parser.getAttributeValue(null, "n"));
-                Op op = new Op(uid, pkgName, code, AppOpsManager.MODE_ERRORED);
+                Op op = new Op(uid, pkgName, Integer.parseInt(parser.getAttributeValue(null, "n")));
                 String mode = parser.getAttributeValue(null, "m");
                 if (mode != null) {
                     op.mode = Integer.parseInt(mode);
-                } else {
-                    String sDefualtMode = parser.getAttributeValue(null, "dm");
-                    int defaultMode;
-                    if (sDefualtMode != null) {
-                        defaultMode = Integer.parseInt(sDefualtMode);
-                    } else {
-                        defaultMode = getDefaultMode(code, uid, pkgName);
-                    }
-                    op.mode = defaultMode;
                 }
                 String time = parser.getAttributeValue(null, "t");
                 if (time != null) {
@@ -1119,12 +1101,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                             AppOpsManager.OpEntry op = ops.get(j);
                             out.startTag(null, "op");
                             out.attribute(null, "n", Integer.toString(op.getOp()));
-                            int defaultMode = getDefaultMode(op.getOp(),
-                                    pkg.getUid(), pkg.getPackageName());
-                            if (op.getMode() != defaultMode) {
+                            if (op.getMode() != AppOpsManager.opToDefaultMode(op.getOp())) {
                                 out.attribute(null, "m", Integer.toString(op.getMode()));
-                            } else {
-                                out.attribute(null, "dm", Integer.toString(defaultMode));
                             }
                             long time = op.getTime();
                             if (time != 0) {
@@ -1313,189 +1291,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     private void checkSystemUid(String function) {
         int uid = Binder.getCallingUid();
         if (uid != Process.SYSTEM_UID) {
-            throw new SecurityException(function
-                    + " must by called by the system");
+            throw new SecurityException(function + " must by called by the system");
         }
     }
 
-    final class AskRunnable implements Runnable {
-        final int code;
-        final int uid;
-        final String packageName;
-        final Op op;
-        final PermissionDialogReq request;
-
-        public AskRunnable(int code, int uid, String packageName, Op op,
-                PermissionDialogReq request) {
-            super();
-            this.code = code;
-            this.uid = uid;
-            this.packageName = packageName;
-            this.op = op;
-            this.request = request;
-        }
-
-        @Override
-        public void run() {
-            synchronized (AppOpsService.this) {
-                Log.e(TAG, "Creating dialog box");
-                op.dialogReqQueue.register(request);
-                if (op.dialogReqQueue.getDialog() == null) {
-                    Dialog d = new PermissionDialog(mContext,
-                            AppOpsService.this, code, uid, packageName);
-                    op.dialogReqQueue.setDialog((PermissionDialog)d);
-                    d.show();
-                }
-            }
-        }
-    }
-
-    private PermissionDialogReq askOperationLocked(int code, int uid,
-            String packageName, Op op) {
-        PermissionDialogReq request = new PermissionDialogReq();
-        mHandler.post(new AskRunnable(code, uid, packageName, op, request));
-        return request;
-    }
-
-    private int getDefaultMode(int code, int uid, String packageName) {
-        int mode = AppOpsManager.opToDefaultMode(code,
-                isStrict(code, uid, packageName));
-        if (AppOpsManager.isStrictOp(code) && mPolicy != null) {
-            int policyMode = mPolicy.getDefualtMode(code, packageName);
-            if (policyMode != AppOpsManager.MODE_ERRORED) {
-                mode = policyMode;
-            }
-        }
-        return mode;
-    }
-
-    private boolean isStrict(int code, int uid, String packageName) {
-        if (!mStrictEnable)
-            return false;
-
-        return UserHandle.isApp(uid);
-    }
-
-    private void printOperationLocked(Op op, int mode, String operation) {
-        if(op != null) {
-            int switchCode = AppOpsManager.opToSwitch(op.op);
-            if (mode == AppOpsManager.MODE_IGNORED) {
-                if (DEBUG) Log.d(TAG, operation + ": reject #" + mode + " for code "
-                        + switchCode + " (" + op.op + ") uid " + op.uid + " package "
-                        + op.packageName);
-            } else if (mode == AppOpsManager.MODE_ALLOWED) {
-                if (DEBUG) Log.d(TAG, operation + ": allowing code " + op.op + " uid "
-                    + op.uid
-                    + " package " + op.packageName);
-            }
-        }
-    }
-
-    private void recordOperationLocked(int code, int uid, String packageName,
-                                    int mode) {
-        Op op = getOpLocked(code, uid, packageName, false);
-        if(op != null) {
-            if(op.noteOpCount != 0)
-                printOperationLocked(op, mode, "noteOperartion");
-            if(op.startOpCount != 0)
-                printOperationLocked(op, mode, "startOperation");
-            if (mode == AppOpsManager.MODE_IGNORED) {
-                op.rejectTime = System.currentTimeMillis();
-            } else if (mode == AppOpsManager.MODE_ALLOWED) {
-                if(op.noteOpCount != 0) {
-                    op.time = System.currentTimeMillis();
-                    op.rejectTime = 0;
-                }
-                if(op.startOpCount != 0) {
-                    if(op.nesting == 0) {
-                        op.time = System.currentTimeMillis();
-                        op.rejectTime = 0;
-                        op.duration = -1;
-                    }
-                    op.nesting = op.nesting + op.startOpCount;
-                    while(op.clientTokens.size() != 0) {
-                        IBinder clientToken = op.clientTokens.get(0);
-                        ClientState client = mClients.get(clientToken);
-                        if (client != null) {
-                            if (client.mStartedOps != null) {
-                                client.mStartedOps.add(op);
-                            }
-                        }
-                        op.clientTokens.remove(0);
-                    }
-                }
-            }
-            op.clientTokens.clear();
-            op.startOpCount = 0;
-            op.noteOpCount = 0;
-        }
-    }
-
-    public void notifyOperation(int code, int uid, String packageName,
-            int mode, boolean remember) {
-        verifyIncomingUid(uid);
-        verifyIncomingOp(code);
-        ArrayList<Callback> repCbs = null;
-        int switchCode = AppOpsManager.opToSwitch(code);
-        synchronized (this) {
-            recordOperationLocked(code, uid, packageName, mode);
-            Op op = getOpLocked(switchCode, uid, packageName, true);
-            if (op != null) {
-                // Send result to all waiting client
-                if (op.dialogReqQueue.getDialog() != null) {
-                    op.dialogReqQueue.notifyAll(mode);
-                    op.dialogReqQueue.setDialog(null);
-                }
-                if (remember && op.mode != mode) {
-                    op.mode = mode;
-                    ArrayList<Callback> cbs = mOpModeWatchers.get(switchCode);
-                    if (cbs != null) {
-                        if (repCbs == null) {
-                            repCbs = new ArrayList<Callback>();
-                        }
-                        repCbs.addAll(cbs);
-                    }
-                    cbs = mPackageModeWatchers.get(packageName);
-                    if (cbs != null) {
-                        if (repCbs == null) {
-                            repCbs = new ArrayList<Callback>();
-                        }
-                        repCbs.addAll(cbs);
-                    }
-                    if (mode == getDefaultMode(op.op, op.uid, op.packageName)) {
-                        // If going into the default mode, prune this op
-                        // if there is nothing else interesting in it.
-                        pruneOp(op, uid, packageName);
-                    }
-                    scheduleWriteNowLocked();
-                }
-            }
-        }
-        if (repCbs != null) {
-            for (int i = 0; i < repCbs.size(); i++) {
-                try {
-                    repCbs.get(i).mCallback.opChanged(switchCode, packageName);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-    }
-
-    private void readPolicy() {
-        if (mStrictEnable) {
-            mPolicy = new AppOpsPolicy(new File(DEFAULT_POLICY_FILE), mContext);
-            mPolicy.readPolicy();
-            mPolicy.debugPoilcy();
-        } else {
-            mPolicy = null;
-        }
-    }
-
-    public boolean isControlAllowed(int code, String packageName) {
-        boolean isShow = true;
-        if (mPolicy != null) {
-            isShow = mPolicy.isControlAllowed(code, packageName);
-        }
-        return isShow;
-    }
 }
